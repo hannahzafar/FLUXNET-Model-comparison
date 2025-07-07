@@ -2,10 +2,6 @@
 # Starting point for statistical analysis between MiCASA and FLUXNET datasets
 
 import argparse
-import numpy as np
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import pandas as pd
 import xarray as xr
 import cartopy.crs as ccrs
@@ -89,8 +85,12 @@ meta_file = amer_filepath + 'AmeriFlux-site-search-results-202410071335.tsv'
 ameriflux_meta = pd.read_csv(meta_file, sep='\t')
 fluxnet_meta = ameriflux_meta.loc[ameriflux_meta['AmeriFlux FLUXNET Data'] == 'Yes'] #use FLUXNET only
 
-#FIX: make an input arg
-site_ID = 'AR-TF1'
+# site_ID = 'AR-TF1'
+parser = argparse.ArgumentParser(description='Site ID')
+parser.add_argument('site_ID', metavar= 'site_ID', type=str,
+                    help='FluxNet Site ID')
+args = parser.parse_args()
+site_ID = args.site_ID
 sel_file = get_single_match(amer_filepath + 'AMF_' + site_ID + '_FLUXNET_SUBSET_*/AMF_' + site_ID + '_FLUXNET_SUBSET_' + timedelta + '_*.csv')
 fluxnet_sel = pd.read_csv(sel_file)
 fluxnet_sel_sub = fluxnet_sel.loc[:,['TIMESTAMP','NEE_VUT_REF','NEE_VUT_REF_QC','GPP_NT_VUT_REF', 'GPP_DT_VUT_REF']].copy()
