@@ -65,8 +65,8 @@ def replace_outliers_with_nan(df, column):
 '''    
 
 # Define misc variables
-amer_filepath = 'ameriflux-data/'
-mic_filepath = 'intermediates/'
+amer_filepath = '../ameriflux-data/'
+mic_filepath = '../intermediates/'
 timedelta = 'DD'
 
 #FIX: I need to have a way to check if the stats were created for each site??
