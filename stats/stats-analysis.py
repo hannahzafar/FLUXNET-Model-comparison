@@ -3,10 +3,6 @@
 
 import argparse
 import pandas as pd
-import xarray as xr
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
-import datetime
 import glob
 import os
 import sys
