@@ -20,17 +20,17 @@ import sys
 def get_single_match(pattern):
     """
     Find exactly one file that matches the glob pattern.
-    
+
     Uses glob.glob to find files matching the given pattern. Returns the single
     match if exactly one is found. Raises ValueError if no matches or multiple
     matches are found.
-    
+
     Args:
         pattern (str): A glob pattern to search for files
-        
+
     Returns:
         str: Path to the single matched file
-        
+
     Raises:
         ValueError: If zero or multiple matches are found
     """
@@ -38,7 +38,7 @@ def get_single_match(pattern):
     if len(matches) == 1:
         return matches[0]
     elif len(matches) == 0:
-        raise ValueError(f"No matches found")
+        raise ValueError("No matches found")
     else:
         raise ValueError(f"Multiple matches found: {matches}")
 
@@ -76,7 +76,7 @@ timedelta = 'DD'
 output_dir = 'plots'
 output_filename = f'{site_ID}_NEE_NPP.png'
 output_path = os.path.join(output_dir, output_filename)
-    
+
 # If the file exists, exit the script
 if os.path.exists(output_path):
     print(f"File for site {site_ID} already exists: {output_path}. Exiting.")
