@@ -7,8 +7,4 @@
 
 # Preprocess all sites via parallel processing on a compute node
 
-module purge
-module load python/GEOSpyD/Min24.4.0-0_py3.12
-
-
-$NOBACKUP/ghgc/micasa/AmeriFlux-analysis/mp-controller-preprocessing.py
+pixi run $NOBACKUP/ghgc/micasa/AmeriFlux-analysis/mp-controller-preprocessing.py
