@@ -1,25 +1,48 @@
 #!/usr/bin/env python
 # Extract fluxnet and micasa data as csv for plotting
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from config import MICASA_DATA_PATH, FLUX_DATA_PATH, FLUX_METADATA
 import pandas as pd
 import xarray as xr
 import glob
 import argparse
-import sys
 import os
 import pytz
 from timezonefinder import TimezoneFinder
 
 
 ######### functions ############
-def get_single_match(pattern):
-    matches = glob.glob(pattern)
+
+def get_single_match(base_path, pattern):
+    """Get exactly one file matching the pattern in base_path.
+ 
+    Args:
+        base_path: Path object - base directory to search in
+        pattern: str - glob pattern (can include subdirectories)
+ 
+    Returns:
+        Path: Single matching file path
+    """
+    if not isinstance(base_path, Path):
+        raise TypeError(f"base_path must be a Path object, got {type(base_path)}")
+ 
+    # Use glob.glob for complex patterns with subdirectories
+    full_pattern = str(base_path / pattern)
+    matches = glob.glob(full_pattern)
+
+    # Convert back to Path objects
+    matches = [Path(m) for m in matches]
+
     if len(matches) == 1:
         return matches[0]
     elif len(matches) == 0:
-        raise ValueError(f"No matches found for: {pattern}")
+        raise ValueError(f"No matches found for pattern '{pattern}' in {base_path}")
     else:
-        raise ValueError(f"Multiple matches found: {matches}")
+        raise ValueError(f"Multiple matches found for pattern '{pattern}': {matches}")
 
 # Function to convert local standard time (no DLS) time to UTC
 tf = TimezoneFinder() 
@@ -70,17 +93,15 @@ for micasa_var in micasa_var_list:
         sys.exit()  # Exit the script immediately
 
 # Open site ID metadata and extract lat/lon
-filepath = '../../ameriflux-data/'
-meta_file = filepath + 'AmeriFlux-site-search-results-202410071335.tsv'
-ameriflux_meta = pd.read_csv(meta_file, sep='\t')
+ameriflux_meta = pd.read_csv(FLUX_METADATA, sep='\t')
 site_lat = ameriflux_meta.loc[ameriflux_meta['Site ID'] == site_ID, 'Latitude (degrees)'].values
 site_lon = ameriflux_meta.loc[ameriflux_meta['Site ID'] == site_ID, 'Longitude (degrees)'].values
 # print(site_lat, site_lon)
 
-# Open site data and access time indices
-site_file = get_single_match(filepath + 'AMF_' + site_ID + 
-                            '_FLUXNET_SUBSET_*/AMF_' + site_ID + 
-                            '_FLUXNET_SUBSET_' + timedelta + '*.csv')
+# Open site data
+pattern = 'AMF_' + site_ID + '_FLUXNET_SUBSET_*/AMF_' + site_ID + '_FLUXNET_SUBSET_' + timedelta + '*.csv'
+site_file = get_single_match(FLUX_DATA_PATH, pattern)
+
 # print(site_file)
 fluxnet_sel = pd.read_csv(site_file)
 
@@ -107,12 +128,11 @@ dates_unique.sort()
 # sys.exit()
 
 # Extract micasa data
-path = '/discover/nobackup/hzafar/ghgc/micasa/micasa-data/'
 if timedelta == 'HH':
-    data_path = path + '3hrly/'
+    data_path = MICASA_DATA_PATH / '3hrly/'
 
 if timedelta == 'DD':
-    data_path = path + 'daily/'
+    data_path = MICASA_DATA_PATH / 'daily/'
 
 path_list = []
 
@@ -121,7 +141,7 @@ for date in dates_unique:
     f_month = f"{date.month:02}" 
     filename = 'MiCASA_v1_flux_*' + date.strftime('%Y%m%d') + '.nc4'
     try: #Test if the micasa file exists for that time stamp
-        filepath = get_single_match(os.path.join(data_path,f_year,f_month,filename))
+        filepath = get_single_match(data_path, os.path.join(data_path,f_year,f_month,filename))
         path_list.append(filepath)
     except ValueError:
         continue # Skip missing MiCASA data
