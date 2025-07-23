@@ -14,9 +14,7 @@ import os
 import pytz
 from timezonefinder import TimezoneFinder
 
-
 ######### functions ############
-
 def get_single_match(base_path, pattern):
     """Get exactly one file matching the pattern in base_path.
  
@@ -96,7 +94,6 @@ for micasa_var in micasa_var_list:
 ameriflux_meta = pd.read_csv(FLUX_METADATA, sep='\t')
 site_lat = ameriflux_meta.loc[ameriflux_meta['Site ID'] == site_ID, 'Latitude (degrees)'].values
 site_lon = ameriflux_meta.loc[ameriflux_meta['Site ID'] == site_ID, 'Longitude (degrees)'].values
-# print(site_lat, site_lon)
 
 # Open site data
 pattern = 'AMF_' + site_ID + '_FLUXNET_SUBSET_*/AMF_' + site_ID + '_FLUXNET_SUBSET_' + timedelta + '*.csv'
@@ -124,8 +121,6 @@ if timedelta == 'DD':
 time = fluxnet_sel_dates.index
 dates_unique = list({dt.date() for dt in time})
 dates_unique.sort()
-# print(dates_unique)
-# sys.exit()
 
 # Extract micasa data
 if timedelta == 'HH':
@@ -135,7 +130,6 @@ if timedelta == 'DD':
     data_path = MICASA_DATA_PATH / 'daily/'
 
 path_list = []
-
 for date in dates_unique:
     f_year = str(date.year)
     f_month = f"{date.month:02}" 
