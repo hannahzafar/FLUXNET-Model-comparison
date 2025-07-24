@@ -1,10 +1,10 @@
 # FLUXNET and Land Model Comparison Analysis
 
-This repository includes all files used in the analysis of the FLUXNET observations to NASA GMAO land models.
-FLUXNET observations are constrainted to the AmeriFlux FLUXNET networks located in North, Central and South America. Data is available for download at: https://ameriflux.lbl.gov/login/?redirect_to=/data/download-data/. Users must create an account to access.
+This repository includes all files used in the analysis of the FLUXNET observations to the Más Informada Carnegie-Ames-Stanford-Approach (MiCASA) land carbon model. FLUXNET observations are constrainted to the AmeriFlux FLUXNET networks located in North, Central and South America. 
 
-Jupyter-notebooks/ serves as a Sandbox for testing.
+This project uses [pixi](https://pixi.sh) for dependency management.
 
-site-plots/ includes scripts for preprocessing land model data and generating comparison plots of each FLUXNET tower site selected to the land model.
+The datasets used in this analysis not included in this repository but are publically available.
+AmeriFlux data is available for download at https://ameriflux.lbl.gov/. 
+MiCASA Land Carbon data is available for download at https://earth.gov/ghgcenter/data-catalog/micasa-carbonflux-grid-v1.
 
-statistics/ includes a statistical analysis ongoing to generate insights on which sites see major deviation between model and flux tower observation.
