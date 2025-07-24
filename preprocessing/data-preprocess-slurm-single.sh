@@ -4,4 +4,4 @@
 # Preprocess a single site on compute node with pixi
 
 
-pixi run $NOBACKUP/ghgc/micasa/FLUXNET-Model-comparison/site-plots/preprocess-data/data-preprocessing.py AR-TF1 
+pixi run $NOBACKUP/ghgc/micasa/FLUXNET-Model-comparison/preprocessing/data-preprocessing.py AR-TF1 
