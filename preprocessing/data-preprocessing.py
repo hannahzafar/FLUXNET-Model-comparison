@@ -114,11 +114,13 @@ if timedelta == 'HH':
     fluxnet_sel_dates = local_std_to_utc_std(fluxnet_sel_dates,'TIMESTAMP_START',site_lat, site_lon)
     fluxnet_sel_dates = fluxnet_sel_dates.set_index('utc_time')
 
-if timedelta == 'DD':
+elif timedelta == 'DD':
     fluxnet_sel_dates = fluxnet_sel.loc[:,['TIMESTAMP']].copy()
     fluxnet_sel_dates['TIMESTAMP'] = pd.to_datetime(fluxnet_sel_dates['TIMESTAMP'],format='%Y%m%d')
     fluxnet_sel_dates = fluxnet_sel_dates.set_index('TIMESTAMP')
 
+else:
+    raise ValueError(f"Timedelta invalid")
 # Create a list of unique dates from the site
 time = fluxnet_sel_dates.index
 dates_unique = list({dt.date() for dt in time})
@@ -128,8 +130,11 @@ dates_unique.sort()
 if timedelta == 'HH':
     data_path = MICASA_DATA_PATH / '3hrly/'
 
-if timedelta == 'DD':
+elif timedelta == 'DD':
     data_path = MICASA_DATA_PATH / 'daily/'
+
+else:
+    raise ValueError(f"Timedelta invalid")
 
 path_list = []
 for date in dates_unique:
