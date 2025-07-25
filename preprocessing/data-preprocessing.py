@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # Extract fluxnet and micasa data as csv for plotting
 
+# Import config variables
 import sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
 from config import MICASA_DATA_PATH, FLUX_DATA_PATH, FLUX_METADATA
+
+# Import other modules
 import pandas as pd
 import xarray as xr
 import glob
