@@ -30,7 +30,7 @@ def run_py_script(script, arg):
         print("STDERR:", e.stderr)
         return f"FAILED: {arg}"
 
-def run_in_parallel(script, arg_list):
+def run_multiprocessing(script, arg_list):
     '''
     This function runs run_py_script over a list of input arguments via multiprocessing
     '''
@@ -50,4 +50,4 @@ if __name__ == "__main__": # Guard preventing future import issues
     script = "data-preprocessing.py"
 
     # Initialize run
-    results = run_in_parallel(script, fluxnet_list)
+    results = run_multiprocessing(script, fluxnet_list)
