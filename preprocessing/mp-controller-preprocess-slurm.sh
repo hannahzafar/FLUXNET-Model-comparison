@@ -7,4 +7,4 @@
 
 # Preprocess all sites via parallel processing on a compute node
 
-pixi run $NOBACKUP/ghgc/micasa/AmeriFlux-analysis/mp-controller-preprocessing.py
+pixi run $NOBACKUP/ghgc/micasa/FLUXNET-Model-comparison/preprocessing/mp-controller-preprocessing.py

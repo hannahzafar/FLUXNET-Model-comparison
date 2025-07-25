@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 # Script to control multiprocessing for data-preprocessing.py
 
+# Import config variables
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from config import FLUX_METADATA
+
+# Import other modules
 import numpy as np
 import pandas as pd
 import subprocess
@@ -34,12 +41,10 @@ def run_in_parallel(script, arg_list):
     return results
 
 
-if __name__ == "__main__":
-    # Import/format the list of paths
-    amer_filepath = 'ameriflux-data/'
-    meta_file = amer_filepath + 'AmeriFlux-site-search-results-202410071335.tsv'
-    ameriflux_meta = pd.read_csv(meta_file, sep='\t')
-    fluxnet_meta = ameriflux_meta.loc[ameriflux_meta['AmeriFlux FLUXNET Data'] == 'Yes'] #use FLUXNET only
+if __name__ == "__main__": # Guard preventing future import issues
+    # Import/format the list of paths (for large data, put inside the guard)
+    ameriflux_meta = pd.read_csv(FLUX_METADATA, sep='\t')
+    fluxnet_meta = ameriflux_meta.loc[ameriflux_meta['AmeriFlux FLUXNET Data'] == 'Yes']
     fluxnet_list = fluxnet_meta['Site ID'].to_list()
     
     script = "data-preprocessing.py"
