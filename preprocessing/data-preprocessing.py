@@ -1,55 +1,25 @@
 #!/usr/bin/env python
 # Extract fluxnet and micasa data as csv for plotting
 
-# Import config variables
+# Import config variables and functions
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import MICASA_DATA_PATH, FLUX_DATA_PATH, FLUX_METADATA
 
+from utils.functions import get_single_match
+
 # Import other modules
 import pandas as pd
 import xarray as xr
-import glob
 import argparse
 import os
 import pytz
 from timezonefinder import TimezoneFinder
 
-
-######### functions ############
-def get_single_match(base_path, pattern):
-    """Get exactly one file matching the pattern in base_path.
-
-    Args:
-        base_path: Path object - base directory to search in
-        pattern: str - glob pattern (can include subdirectories)
-
-    Returns:
-        Path: Single matching file path
-    """
-    if not isinstance(base_path, Path):
-        raise TypeError(f"base_path must be a Path object, got {type(base_path)}")
-
-    # Use glob.glob for complex patterns with subdirectories
-    full_pattern = str(base_path / pattern)
-    matches = glob.glob(full_pattern)
-
-    # Convert back to Path objects
-    matches = [Path(m) for m in matches]
-
-    if len(matches) == 1:
-        return matches[0]
-    elif len(matches) == 0:
-        raise ValueError(f"No matches found for pattern '{pattern}' in {base_path}")
-    else:
-        raise ValueError(f"Multiple matches found for pattern '{pattern}': {matches}")
-
-
 # Function to convert local standard time (no DLS) time to UTC
 tf = TimezoneFinder()
-
 
 def local_std_to_utc_std(df, col, lat, lon):
     def convert_row(row):
@@ -120,8 +90,6 @@ pattern = (
     + "*.csv"
 )
 site_file = get_single_match(FLUX_DATA_PATH, pattern)
-
-# print(site_file)
 fluxnet_sel = pd.read_csv(site_file)
 
 # select subset of columns + convert to datetime objects
