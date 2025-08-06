@@ -1,39 +1,18 @@
 #!/usr/bin/env python
 # Starting point for statistical analysis between MiCASA and FLUXNET datasets
 
-import argparse
-import pandas as pd
-import glob
-import os
+# Import config variables and functions
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from config import MICASA_DATA_PATH, FLUX_DATA_PATH, FLUX_METADATA
+
+from utils.functions import get_single_match
+import pandas as pd
+import os
 
 ######### functions ############
-# Define a single match file location function
-def get_single_match(pattern):
-    """
-    Find exactly one file that matches the glob pattern.
-
-    Uses glob.glob to find files matching the given pattern. Returns the single
-    match if exactly one is found. Raises ValueError if no matches or multiple
-    matches are found.
-
-    Args:
-        pattern (str): A glob pattern to search for files
-
-    Returns:
-        str: Path to the single matched file
-
-    Raises:
-        ValueError: If zero or multiple matches are found
-    """
-    matches = glob.glob(pattern)
-    if len(matches) == 1:
-        return matches[0]
-    elif len(matches) == 0:
-        raise ValueError("No matches found")
-    else:
-        raise ValueError(f"Multiple matches found: {matches}")
-
 #FIX: I'm not sure if I should throw away outliers for this?
 '''
 def replace_outliers_with_nan(df, column):
@@ -58,8 +37,6 @@ def replace_outliers_with_nan(df, column):
 '''    
 
 # Define misc variables
-amer_filepath = '../ameriflux-data/'
-mic_filepath = '../intermediates/'
 timedelta = 'DD'
 
 #FIX: I need to have a way to check if the stats were created for each site??
@@ -78,20 +55,28 @@ if os.path.exists(output_path):
 
 #################### Import Flux Data ##############################
 # Import site metadata csv
-meta_file = amer_filepath + 'AmeriFlux-site-search-results-202410071335.tsv'
-ameriflux_meta = pd.read_csv(meta_file, sep='\t')
+ameriflux_meta = pd.read_csv(FLUX_METADATA, sep='\t')
 fluxnet_meta = ameriflux_meta.loc[ameriflux_meta['AmeriFlux FLUXNET Data'] == 'Yes'] #use FLUXNET only
 ids_list = fluxnet_meta['Site ID']
-# print(type(ids_list))
-# sys.exit()
 
 # parser = argparse.ArgumentParser(description='Site ID')
 # parser.add_argument('site_ID', metavar= 'site_ID', type=str,
 #                     help='FluxNet Site ID')
 # args = parser.parse_args()
 # site_ID = args.site_ID
+
 for site_ID in ids_list:
-sel_file = get_single_match(amer_filepath + 'AMF_' + site_ID + '_FLUXNET_SUBSET_*/AMF_' + site_ID + '_FLUXNET_SUBSET_' + timedelta + '_*.csv')
+pattern = (
+"AMF_"
++ site_ID
++ "_FLUXNET_SUBSET_*/AMF_"
++ site_ID
++ "_FLUXNET_SUBSET_"
++ timedelta
++ "*.csv"
+)
+
+sel_file = get_single_match(FLUX_DATA_PATH, pattern)
 fluxnet_sel = pd.read_csv(sel_file)
 fluxnet_sel_sub = fluxnet_sel.loc[:,['TIMESTAMP','NEE_VUT_REF','NEE_VUT_REF_QC','GPP_NT_VUT_REF', 'GPP_DT_VUT_REF']].copy()
 fluxnet_sel_sub['TIMESTAMP'] = pd.to_datetime(fluxnet_sel_sub['TIMESTAMP'],format='%Y%m%d')
