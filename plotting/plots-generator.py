@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 # Generate maps, NEE and NPP comparison plots for each site
 
-# Import config variables
+# Import config variables and functions
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import MICASA_PREPROCESSED_DATA, FLUX_DATA_PATH, FLUX_METADATA
 
+from utils.functions import get_single_match
 
 # Import other modules
 import argparse
@@ -16,39 +17,9 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
 import cartopy.crs as ccrs
-import glob
 import os
-import sys
-
 
 ######### functions ############
-# Define a single match file location function
-def get_single_match(pattern):
-    """
-    Find exactly one file that matches the glob pattern.
-
-    Uses glob.glob to find files matching the given pattern. Returns the single
-    match if exactly one is found. Raises ValueError if no matches or multiple
-    matches are found.
-
-    Args:
-        pattern (str): A glob pattern to search for files
-
-    Returns:
-        str: Path to the single matched file
-
-    Raises:
-        ValueError: If zero or multiple matches are found
-    """
-    matches = glob.glob(pattern)
-    if len(matches) == 1:
-        return matches[0]
-    elif len(matches) == 0:
-        raise ValueError("No matches found")
-    else:
-        raise ValueError(f"Multiple matches found: {matches}")
-
-
 def replace_outliers_with_nan(df, column):
     """Replaces outliers in a DataFrame column with NaN.
 
@@ -112,17 +83,17 @@ site_lon = fluxnet_meta.loc[
     fluxnet_meta["Site ID"] == site_ID, "Longitude (degrees)"
 ].values
 
-sel_file = get_single_match(
-    FLUX_DATA_PATH
-    + "AMF_"
+pattern = (
+    "AMF_"
     + site_ID
     + "_FLUXNET_SUBSET_*/AMF_"
     + site_ID
     + "_FLUXNET_SUBSET_"
     + timedelta
-    + "_*.csv"
+    + "*.csv"
 )
-fluxnet_sel = pd.read_csv(sel_file)
+site_file = get_single_match(FLUX_DATA_PATH, pattern)
+fluxnet_sel = pd.read_csv(site_file)
 fluxnet_sel_sub = fluxnet_sel.loc[
     :,
     ["TIMESTAMP", "NEE_VUT_REF", "NEE_VUT_REF_QC", "GPP_NT_VUT_REF", "GPP_DT_VUT_REF"],
