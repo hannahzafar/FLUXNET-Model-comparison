@@ -2,6 +2,14 @@
 # Wrapper script to run plots-generator.py for all the sites in the Fluxnet list
 #FIX: ???# (without multiprocessing, not necessary due to performance)
 
+# Import config variables and functions
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from config import FLUX_METADATA
+
+# Import other modules
 import pandas as pd
 import importlib
 
@@ -12,9 +20,7 @@ mp_controller = importlib.import_module("mp-controller-preprocessing")
 
 if __name__ == "__main__":
     # Import/format the list of paths
-    amer_filepath = "../ameriflux-data/"
-    meta_file = amer_filepath + "AmeriFlux-site-search-results-202410071335.tsv"
-    ameriflux_meta = pd.read_csv(meta_file, sep="\t")
+    ameriflux_meta = pd.read_csv(FLUX_METADATA, sep="\t")
     fluxnet_meta = ameriflux_meta.loc[
         ameriflux_meta["AmeriFlux FLUXNET Data"] == "Yes"
     ]  # use FLUXNET only
