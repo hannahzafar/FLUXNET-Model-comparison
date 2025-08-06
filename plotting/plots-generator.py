@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 # Generate maps, NEE and NPP comparison plots for each site
+
+# Import config variables
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from config import MICASA_PREPROCESSED_DATA, FLUX_DATA_PATH, FLUX_METADATA
+
+
+# Import other modules
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
@@ -72,8 +82,6 @@ args = parser.parse_args()
 site_ID = args.site_ID
 
 # Define misc variables
-amer_filepath = "../ameriflux-data/"
-mic_filepath = "preprocess-data/intermediates/"
 timedelta = "DD"
 
 
@@ -90,7 +98,7 @@ if os.path.exists(output_path):
 
 #################### Import Flux Data ##############################
 # Import site metadata csv
-meta_file = amer_filepath + "AmeriFlux-site-search-results-202410071335.tsv"
+meta_file = FLUX_METADATA
 ameriflux_meta = pd.read_csv(meta_file, sep="\t")
 fluxnet_meta = ameriflux_meta.loc[
     ameriflux_meta["AmeriFlux FLUXNET Data"] == "Yes"
@@ -105,7 +113,7 @@ site_lon = fluxnet_meta.loc[
 ].values
 
 sel_file = get_single_match(
-    amer_filepath
+    FLUX_DATA_PATH
     + "AMF_"
     + site_ID
     + "_FLUXNET_SUBSET_*/AMF_"
@@ -155,7 +163,7 @@ fluxnet_final = replace_outliers_with_nan(fluxnet_final, "GPP (DT) (kgC m-2 s-1)
 
 ############ Import Preprocessed Micasa Data ################
 filename = f"{site_ID}_micasa_{timedelta}.csv"
-path = os.path.join(mic_filepath, filename)
+path = os.path.join(MICASA_PREPROCESSED_DATA, filename)
 micasa_ds = pd.read_csv(path, index_col=0, parse_dates=True)
 
 ############## Append datasets #########################
