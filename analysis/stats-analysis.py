@@ -14,6 +14,7 @@ import os
 
 ######### functions ############
 # FIX: I'm not sure if I should throw away outliers for this?
+# TODO: If I am tossing outliers then I am going to move this function into utils
 '''
 def replace_outliers_with_nan(df, column):
     """Replaces outliers in a DataFrame column with NaN.
@@ -66,6 +67,8 @@ ids_list = fluxnet_meta["Site ID"]
 #                     help='FluxNet Site ID')
 # args = parser.parse_args()
 # site_ID = args.site_ID
+
+results = []
 
 for site_ID in ids_list:
     pattern = (
@@ -135,11 +138,23 @@ for site_ID in ids_list:
     NEE_ds["FluxNet"] = fluxnet_final["NEE (kgC m-2 s-1)"]
 
     NEE_RSME = ((NEE_ds.MiCASA - NEE_ds.FluxNet) ** 2).mean() ** 0.5
-    print(NEE_RSME)
+    # print(NEE_RSME)
 
     # NPP
     NPP_ds = pd.DataFrame()
     NPP_ds["MiCASA"] = micasa_ds["MiCASA NPP (kg m-2 s-1)"]
     NPP_ds["FluxNet DT GPP/2"] = fluxnet_final["GPP (DT) (kgC m-2 s-1)"] / 2
     NPP_RSME = ((NPP_ds.MiCASA - NPP_ds["FluxNet DT GPP/2"]) ** 2).mean() ** 0.5
-    print(NPP_RSME)
+    # print(NPP_RSME)
+
+    # Write values out to a list
+    results.append({
+        'SiteID' : site_ID,
+        'NEE_RSME': NEE_RSME,
+        'NPP_RSME': NPP_RSME
+    })
+
+ds = pd.DataFrame(results)
+fname = "results.csv"
+ds.to_csv(fname, index=False)
+print(f"CSV written to: {fname}")
