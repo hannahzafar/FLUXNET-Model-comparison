@@ -11,6 +11,7 @@ from config import MICASA_PREPROCESSED_DATA, FLUX_DATA_PATH, FLUX_METADATA
 from utils.functions import get_single_match
 import pandas as pd
 import os
+from sklearn.metrics import root_mean_squared_error
 
 ######### functions ############
 # FIX: I'm not sure if I should throw away outliers for this?
@@ -137,21 +138,23 @@ for site_ID in ids_list:
     NEE_ds["MiCASA"] = micasa_ds["MiCASA NEE (kg m-2 s-1)"]
     NEE_ds["FluxNet"] = fluxnet_final["NEE (kgC m-2 s-1)"]
 
-    NEE_RSME = ((NEE_ds.MiCASA - NEE_ds.FluxNet) ** 2).mean() ** 0.5
+    # NEE_RSME = ((NEE_ds.MiCASA - NEE_ds.FluxNet) ** 2).mean() ** 0.5
     # print(NEE_RSME)
+    NEE_RSME = root_mean_squared_error(NEE_ds.MiCASA, NEE_ds.FluxNet)
 
     # NPP
     NPP_ds = pd.DataFrame()
     NPP_ds["MiCASA"] = micasa_ds["MiCASA NPP (kg m-2 s-1)"]
     NPP_ds["FluxNet DT GPP/2"] = fluxnet_final["GPP (DT) (kgC m-2 s-1)"] / 2
-    NPP_RSME = ((NPP_ds.MiCASA - NPP_ds["FluxNet DT GPP/2"]) ** 2).mean() ** 0.5
+    # NPP_RSME = ((NPP_ds.MiCASA - NPP_ds["FluxNet DT GPP/2"]) ** 2).mean() ** 0.5
     # print(NPP_RSME)
+    NPP_RSME = root_mean_squared_error(NPP_ds.MiCASA, NPP_ds["FluxNet DT GPP/2"])
 
     # Write values out to a list
     results.append({
         'SiteID' : site_ID,
         'NEE_RSME': NEE_RSME,
-        'NPP_RSME': NPP_RSME
+        'NPP_RSME': NPP_RSME,
     })
 
 ds = pd.DataFrame(results)
