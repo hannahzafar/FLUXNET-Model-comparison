@@ -68,6 +68,7 @@ if os.path.exists(output_path):
     sys.exit()  # Exit the script immediately
 
 #################### Import Flux Data ##############################
+#TODO: turn this into a utils function
 # Import site metadata csv
 meta_file = FLUX_METADATA
 ameriflux_meta = pd.read_csv(meta_file, sep="\t")
