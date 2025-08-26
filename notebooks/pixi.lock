@@ -7,6 +7,7 @@ environments:
       linux-64:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_libgcc_mutex-0.1-conda_forge.tar.bz2
       - conda: https://conda.anaconda.org/conda-forge/linux-64/_openmp_mutex-4.5-2_gnu.tar.bz2
+      - conda: https://conda.anaconda.org/conda-forge/noarch/adjusttext-1.3.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/anyio-4.10.0-pyhe01879c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/argon2-cffi-25.1.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/argon2-cffi-bindings-25.1.0-py312h4c3975b_0.conda
@@ -335,6 +336,18 @@ packages:
   license_family: BSD
   size: 23621
   timestamp: 1650670423406
+- conda: https://conda.anaconda.org/conda-forge/noarch/adjusttext-1.3.0-pyhd8ed1ab_0.conda
+  sha256: 1fce2ff1859d1494c053387b241b44a12cd6ac97c0e27cd0edba70bce268c97f
+  md5: 57a40ccb7b409dfae9d340629b71d73e
+  depends:
+  - matplotlib-base
+  - numpy
+  - python >=3.6
+  - scipy
+  license: MIT
+  license_family: MIT
+  size: 18280
+  timestamp: 1730725098822
 - conda: https://conda.anaconda.org/conda-forge/noarch/anyio-4.10.0-pyhe01879c_0.conda
   sha256: d1b50686672ebe7041e44811eda563e45b94a8354db67eca659040392ac74d63
   md5: cc2613bfa71dec0eb2113ee21ac9ccbf
@@ -3859,8 +3872,6 @@ packages:
   - python >=3.12,<3.13.0a0
   - python_abi 3.12.* *_cp312
   - scipy !=1.9.2,>=1.8
-  arch: x86_64
-  platform: linux
   license: BSD-3-Clause
   license_family: BSD
   size: 12062670
