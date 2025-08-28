@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import MICASA_PREPROCESSED_DATA, FLUX_DATA_PATH, FLUX_METADATA
 
-from utils.functions import get_single_match, replace_outliers_with_nan
+from utils.functions import import_flux_site_data, replace_outliers_with_nan, import_flux_metadata
 
 # Import other modules
 import argparse
@@ -44,15 +44,8 @@ if os.path.exists(output_path):
     sys.exit()  # Exit the script immediately
 
 #################### Import Flux Data ##############################
-#TODO: turn this into a utils function
-# Import site metadata csv
-meta_file = FLUX_METADATA
-ameriflux_meta = pd.read_csv(meta_file, sep="\t")
-fluxnet_meta = ameriflux_meta.loc[
-    ameriflux_meta["AmeriFlux FLUXNET Data"] == "Yes"
-]  # use FLUXNET only
-
-# Import selected site daily subset data
+# Import metadata and identify site ID lat/lon
+fluxnet_meta = import_flux_metadata(FLUX_METADATA)
 site_lat = fluxnet_meta.loc[
     fluxnet_meta["Site ID"] == site_ID, "Latitude (degrees)"
 ].values
@@ -60,27 +53,10 @@ site_lon = fluxnet_meta.loc[
     fluxnet_meta["Site ID"] == site_ID, "Longitude (degrees)"
 ].values
 
-pattern = (
-    "AMF_"
-    + site_ID
-    + "_FLUXNET_SUBSET_*/AMF_"
-    + site_ID
-    + "_FLUXNET_SUBSET_"
-    + timedelta
-    + "*.csv"
-)
-site_file = get_single_match(FLUX_DATA_PATH, pattern)
-fluxnet_sel = pd.read_csv(site_file)
-fluxnet_sel_sub = fluxnet_sel.loc[
-    :,
-    ["TIMESTAMP", "NEE_VUT_REF", "NEE_VUT_REF_QC", "GPP_NT_VUT_REF", "GPP_DT_VUT_REF"],
-].copy()
-fluxnet_sel_sub["TIMESTAMP"] = pd.to_datetime(
-    fluxnet_sel_sub["TIMESTAMP"], format="%Y%m%d"
-)
-fluxnet_sel_sub = fluxnet_sel_sub.set_index("TIMESTAMP")
+# Import site AmeriFlux FLUXNET data
+fluxnet_sel_sub = import_flux_site_data(FLUX_DATA_PATH, site_ID, timedelta)
 
-# Make a clean output df
+# Make a clean output df for conversions
 fluxnet_final = pd.DataFrame()
 
 # NEE
@@ -139,14 +115,6 @@ fig, axs = plt.subplots(
 
 # Define the map projection
 proj = ccrs.PlateCarree()
-
-# Extract site lat/lon
-site_lat = ameriflux_meta.loc[
-    ameriflux_meta["Site ID"] == site_ID, "Latitude (degrees)"
-].values
-site_lon = ameriflux_meta.loc[
-    ameriflux_meta["Site ID"] == site_ID, "Longitude (degrees)"
-].values
 
 # Pick map location based on location of site
 if site_lat >= 20:
