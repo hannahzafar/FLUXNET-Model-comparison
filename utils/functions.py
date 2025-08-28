@@ -3,6 +3,58 @@
 from pathlib import Path
 import glob
 import numpy as np
+import pandas as pd
+
+
+def import_flux_metadata(flux_metadata_path):
+    """ Import FLUXNET only Ameriflux metadata information
+
+    Args: 
+        flux_metadata_path (Path object): Path to Ameriflux metadata CSV
+
+
+    Returns:
+        fluxnet_sel_sub (pd.DataFrame): clean dataframe of 
+    """
+
+    # Import site metadata csv
+    ameriflux_meta = pd.read_csv(flux_metadata_path, sep="\t")
+    fluxnet_meta = ameriflux_meta.loc[
+            ameriflux_meta["AmeriFlux FLUXNET Data"] == "Yes"
+            ]  # use FLUXNET only
+    return fluxnet_meta
+
+def import_flux_site_data(flux_data_path, site_ID, timedelta):
+    """ Import site data for selected site ID and timedelta
+
+    Args: 
+        flux_data_path (Path object): path to flux data CSVs
+        site_ID (str): FluxNet Site ID of interest
+        timedelta (str): measurement frequency (HH or DD)
+
+    Returns:
+        fluxnet_sel_sub (pd.DataFrame): A cleaned DataFrame with all sites metadata
+    """
+    pattern = (
+        "AMF_"
+        + site_ID
+        + "_FLUXNET_SUBSET_*/AMF_"
+        + site_ID
+        + "_FLUXNET_SUBSET_"
+        + timedelta
+        + "*.csv"
+    )
+    site_file = get_single_match(flux_data_path, pattern)
+    fluxnet_sel = pd.read_csv(site_file)
+    fluxnet_sel_sub = fluxnet_sel.loc[
+        :,
+        ["TIMESTAMP", "NEE_VUT_REF", "NEE_VUT_REF_QC", "GPP_NT_VUT_REF", "GPP_DT_VUT_REF"],
+    ].copy()
+    fluxnet_sel_sub["TIMESTAMP"] = pd.to_datetime(
+        fluxnet_sel_sub["TIMESTAMP"], format="%Y%m%d"
+    )
+    fluxnet_sel_sub = fluxnet_sel_sub.set_index("TIMESTAMP")
+    return fluxnet_sel_sub
 
 
 def get_single_match(base_path, pattern):
