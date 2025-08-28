@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import MICASA_PREPROCESSED_DATA, FLUX_DATA_PATH, FLUX_METADATA
 
-from utils.functions import get_single_match
+from utils.functions import get_single_match, replace_outliers_with_nan
 
 # Import other modules
 import argparse
@@ -18,30 +18,6 @@ import matplotlib.dates as mdates
 import pandas as pd
 import cartopy.crs as ccrs
 import os
-
-######### functions ############
-def replace_outliers_with_nan(df, column):
-    """Replaces outliers in a DataFrame column with NaN.
-
-    Args:
-        df (pd.DataFrame): The DataFrame.
-        column (str): The column name to check for outliers.
-
-    Returns:
-        pd.DataFrame: The DataFrame with outliers replaced by NaN.
-    """
-    Q1 = df[column].quantile(0.25)
-    Q3 = df[column].quantile(0.75)
-    IQR = Q3 - Q1
-
-    lower_bound = Q1 - 1.5 * IQR
-    upper_bound = Q3 + 1.5 * IQR
-
-    df[column] = df[column].mask(
-        (df[column] < lower_bound) | (df[column] > upper_bound), np.nan
-    )
-    return df
-
 
 ######### input arguments ############
 # Input site ID
