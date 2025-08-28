@@ -135,7 +135,7 @@ axs[0].scatter(
     site_lon, site_lat, marker="*", s=300, color="yellow", edgecolor="black", zorder=3
 )
 
-
+#TODO: Make this a function I can call for stats analysis?
 NEE_ds.plot(ax=axs[1], ylabel="NEE\n(kgC m$^{-2}$ s$^{-1}$)")
 # Format x-axis labels
 axs[1].xaxis.set_major_locator(mdates.AutoDateLocator())
