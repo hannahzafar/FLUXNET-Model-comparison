@@ -61,11 +61,11 @@ def get_single_match(base_path, pattern):
     """Get exactly one file matching the pattern in base_path.
 
     Args:
-        base_path: Path object - base directory to search in
-        pattern: str - glob pattern (can include subdirectories)
+        base_path (Path object): base directory to search in
+        pattern (str): glob pattern (can include subdirectories)
 
     Returns:
-        Path: Single matching file path
+        Path (Path object): Single matching file path
     """
     if not isinstance(base_path, Path):
         raise TypeError(f"base_path must be a Path object, got {type(base_path)}")
@@ -86,7 +86,7 @@ def get_single_match(base_path, pattern):
 
 
 def replace_outliers_with_nan(df, column):
-    """Replaces outliers (1.5 IQR above/below) in a DataFrame column with NaN.
+    """Replace outliers (1.5 IQR above/below) in a DataFrame column with NaN.
 
     Args:
         df (pd.DataFrame): The DataFrame.
