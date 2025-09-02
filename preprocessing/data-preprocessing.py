@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import MICASA_DATA_PATH, FLUX_DATA_PATH, FLUX_METADATA
 
-from utils.functions import get_single_match
+from utils.functions import import_flux_site_data, get_single_match
 
 # Import other modules
 import pandas as pd
@@ -57,45 +57,9 @@ site_lon = ameriflux_meta.loc[
 ].values
 
 # Open site data
-pattern = (
-    "AMF_"
-    + site_ID
-    + "_FLUXNET_SUBSET_*/AMF_"
-    + site_ID
-    + "_FLUXNET_SUBSET_"
-    + timedelta
-    + "*.csv"
-)
-site_file = get_single_match(FLUX_DATA_PATH, pattern)
-fluxnet_sel = pd.read_csv(site_file)
+fluxnet_sel = import_flux_site_data(FLUX_DATA_PATH, site_ID, timedelta)
 
-# select subset of columns + convert to datetime objects
-if timedelta == "HH":
-    fluxnet_sel_dates = fluxnet_sel.loc[:, ["TIMESTAMP_START", "TIMESTAMP_END"]].copy()
-    fluxnet_sel_dates["TIMESTAMP_START"] = pd.to_datetime(
-        fluxnet_sel_dates["TIMESTAMP_START"], format="%Y%m%d%H%M"
-    )
-    fluxnet_sel_dates["TIMESTAMP_END"] = pd.to_datetime(
-        fluxnet_sel_dates["TIMESTAMP_END"], format="%Y%m%d%H%M"
-    )
-
-    # Convert time to UTC
-    fluxnet_sel_dates = local_std_to_utc_std(
-        fluxnet_sel_dates, "TIMESTAMP_START", site_lat, site_lon
-    )
-    fluxnet_sel_dates = fluxnet_sel_dates.set_index("utc_time")
-
-elif timedelta == "DD":
-    fluxnet_sel_dates = fluxnet_sel.loc[:, ["TIMESTAMP"]].copy()
-    fluxnet_sel_dates["TIMESTAMP"] = pd.to_datetime(
-        fluxnet_sel_dates["TIMESTAMP"], format="%Y%m%d"
-    )
-    fluxnet_sel_dates = fluxnet_sel_dates.set_index("TIMESTAMP")
-
-else:
-    raise ValueError(f"Timedelta invalid")
-# Create a list of unique dates from the site
-time = fluxnet_sel_dates.index
+time = fluxnet_sel.index
 dates_unique = list({dt.date() for dt in time})
 dates_unique.sort()
 
