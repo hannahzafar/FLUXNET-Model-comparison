@@ -5,7 +5,7 @@ ameriflux-data
 intermediates
 plots
 __pycache__
-results.csv
+results*.csv
 
 # pixi environments
 .pixi
