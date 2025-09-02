@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import MICASA_PREPROCESSED_DATA, FLUX_DATA_PATH, FLUX_METADATA
 
-from utils.functions import get_single_match
+from utils.functions import import_flux_site_data
 import pandas as pd
 import os
 from sklearn.metrics import root_mean_squared_error
@@ -47,32 +47,7 @@ ids_list = fluxnet_meta["Site ID"]
 results = []
 
 for site_ID in ids_list:
-    pattern = (
-        "AMF_"
-        + site_ID
-        + "_FLUXNET_SUBSET_*/AMF_"
-        + site_ID
-        + "_FLUXNET_SUBSET_"
-        + timedelta
-        + "*.csv"
-    )
-
-    sel_file = get_single_match(FLUX_DATA_PATH, pattern)
-    fluxnet_sel = pd.read_csv(sel_file)
-    fluxnet_sel_sub = fluxnet_sel.loc[
-        :,
-        [
-            "TIMESTAMP",
-            "NEE_VUT_REF",
-            "NEE_VUT_REF_QC",
-            "GPP_NT_VUT_REF",
-            "GPP_DT_VUT_REF",
-        ],
-    ].copy()
-    fluxnet_sel_sub["TIMESTAMP"] = pd.to_datetime(
-        fluxnet_sel_sub["TIMESTAMP"], format="%Y%m%d"
-    )
-    fluxnet_sel_sub = fluxnet_sel_sub.set_index("TIMESTAMP")
+    fluxnet_sel_sub = import_flux_site_data(FLUX_DATA_PATH, site_ID, timedelta)
 
     # Make a clean output df
     fluxnet_final = pd.DataFrame()
