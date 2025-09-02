@@ -88,16 +88,12 @@ for site_ID in ids_list:
     NEE_ds["MiCASA"] = micasa_ds["MiCASA NEE (kg m-2 s-1)"]
     NEE_ds["FluxNet"] = fluxnet_final["NEE (kgC m-2 s-1)"]
 
-    # NEE_RSME = ((NEE_ds.MiCASA - NEE_ds.FluxNet) ** 2).mean() ** 0.5
-    # print(NEE_RSME)
     NEE_RSME = root_mean_squared_error(NEE_ds.MiCASA, NEE_ds.FluxNet)
 
     # NPP
     NPP_ds = pd.DataFrame()
     NPP_ds["MiCASA"] = micasa_ds["MiCASA NPP (kg m-2 s-1)"]
     NPP_ds["FluxNet DT GPP/2"] = fluxnet_final["GPP (DT) (kgC m-2 s-1)"] / 2
-    # NPP_RSME = ((NPP_ds.MiCASA - NPP_ds["FluxNet DT GPP/2"]) ** 2).mean() ** 0.5
-    # print(NPP_RSME)
     NPP_RSME = root_mean_squared_error(NPP_ds.MiCASA, NPP_ds["FluxNet DT GPP/2"])
 
     # Write values out to a list
