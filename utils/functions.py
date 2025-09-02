@@ -78,15 +78,37 @@ def import_flux_site_data(flux_data_path, site_ID, timedelta):
     )
     site_file = get_single_match(flux_data_path, pattern)
     fluxnet_sel = pd.read_csv(site_file)
-    fluxnet_sel_sub = fluxnet_sel.loc[
-        :,
+
+    if timedelta == "DD":
+        fluxnet_sel_sub = fluxnet_sel.loc[:,
         ["TIMESTAMP", "NEE_VUT_REF", "NEE_VUT_REF_QC", "GPP_NT_VUT_REF", "GPP_DT_VUT_REF"],
-    ].copy()
-    fluxnet_sel_sub["TIMESTAMP"] = pd.to_datetime(
-        fluxnet_sel_sub["TIMESTAMP"], format="%Y%m%d"
-    )
-    fluxnet_sel_sub = fluxnet_sel_sub.set_index("TIMESTAMP")
-    return fluxnet_sel_sub
+        ].copy()
+        fluxnet_sel_sub["TIMESTAMP"] = pd.to_datetime(
+                fluxnet_sel_sub["TIMESTAMP"], format="%Y%m%d"
+            )
+        fluxnet_sel_sub = fluxnet_sel_sub.set_index("TIMESTAMP")
+        return fluxnet_sel_sub
+
+    elif timedelta == "HH":
+        raise ValueError("Half-hourly data parsing incomplete, refer to utils/functions.py")
+        #TODO: Fix this so that the formatting works similar to DD but then need to pass function
+        """
+        fluxnet_sel_dates = fluxnet_sel.loc[:, ["TIMESTAMP_START", "TIMESTAMP_END"]].copy()
+        fluxnet_sel_dates["TIMESTAMP_START"] = pd.to_datetime(
+            fluxnet_sel_dates["TIMESTAMP_START"], format="%Y%m%d%H%M"
+        )
+        fluxnet_sel_dates["TIMESTAMP_END"] = pd.to_datetime(
+            fluxnet_sel_dates["TIMESTAMP_END"], format="%Y%m%d%H%M"
+        )
+
+        # Convert time to UTC
+        fluxnet_sel_dates = local_std_to_utc_std(
+            fluxnet_sel_dates, "TIMESTAMP_START", site_lat, site_lon
+        )
+        fluxnet_sel_dates = fluxnet_sel_dates.set_index("utc_time")
+        """
+    else:
+        raise ValueError(f"Timedelta {timedelta} invalid")
 
 
 def get_single_match(base_path, pattern):
