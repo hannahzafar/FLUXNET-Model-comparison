@@ -4,6 +4,8 @@ from pathlib import Path
 import glob
 import numpy as np
 import pandas as pd
+import pytz
+from timezonefinder import TimezoneFinder
 
 
 def import_flux_metadata(flux_metadata_path):
@@ -23,6 +25,36 @@ def import_flux_metadata(flux_metadata_path):
             ameriflux_meta["AmeriFlux FLUXNET Data"] == "Yes"
             ]  # use FLUXNET only
     return fluxnet_meta
+
+def local_std_to_utc_std(df, col, lat, lon):
+    """ Convert local standard time (no DLS) to UTC
+
+    Args:
+        df (pd.DataFrame): dataframe with time values to conver
+        col (str): Column Name containing values to convert
+        lat: latitude
+        lon: longitude
+
+    Returns:
+        pd.Dataframe: A dataframe with an additional column in UTC time 
+    """
+    def convert_row(row):
+        # Find the timezone for the given lat/lon
+        tf = TimezoneFinder()
+        timezone_str = tf.timezone_at(lat=lat, lng=lon)
+        if timezone_str is not None:
+            timezone = pytz.timezone(timezone_str)
+            # Localize datetime without DST
+            standard_time = timezone.normalize(
+                timezone.localize(row[col], is_dst=False)
+            )
+            # Convert to UTC
+            return standard_time.astimezone(pytz.utc)
+        else:
+            raise ValueError("Cannot determine site time zone")
+
+    df["utc_time"] = df.apply(convert_row, axis=1)
+    return df
 
 def import_flux_site_data(flux_data_path, site_ID, timedelta):
     """ Import site data for selected site ID and timedelta

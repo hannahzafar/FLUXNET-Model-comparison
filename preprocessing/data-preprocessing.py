@@ -15,29 +15,6 @@ import pandas as pd
 import xarray as xr
 import argparse
 import os
-import pytz
-from timezonefinder import TimezoneFinder
-
-# Function to convert local standard time (no DLS) time to UTC
-tf = TimezoneFinder()
-
-def local_std_to_utc_std(df, col, lat, lon):
-    def convert_row(row):
-        # Find the timezone for the given lat/lon
-        timezone_str = tf.timezone_at(lat=lat, lng=lon)
-        if timezone_str is not None:
-            timezone = pytz.timezone(timezone_str)
-            # Localize datetime without DST
-            standard_time = timezone.normalize(
-                timezone.localize(row[col], is_dst=False)
-            )
-            # Convert to UTC
-            return standard_time.astimezone(pytz.utc)
-        else:
-            raise ValueError("Cannot determine site time zone")
-
-    df["utc_time"] = df.apply(convert_row, axis=1)
-    return df
 
 
 ### Modified for multiprocessing: for simplicity, hard coded timedelta and variable list
