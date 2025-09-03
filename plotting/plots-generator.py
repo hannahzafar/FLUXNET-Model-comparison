@@ -18,6 +18,26 @@ import pandas as pd
 import cartopy.crs as ccrs
 import os
 
+##### Functions ########
+def import_flux_and_prep_data(site_ID):
+    # Import site AmeriFlux FLUXNET data
+    fluxnet_sel = import_flux_site_data(FLUX_DATA_PATH, site_ID, timedelta)
+
+    # Generate old and new list to clean data
+    cols = fluxnet_sel.columns.tolist()
+    list = [cols[0], cols[-1]]
+    new_list = ["NEE (kgC m-2 s-1)", "GPP_DT (kgC m-2 s-1)"]
+
+    # Convert and clean datasets 
+    for old, new in zip(list, new_list):
+       fluxnet_sel = convert_flux_to_micasa_units(fluxnet_sel, old, new)
+       fluxnet_sel = clean_flux_datasets(fluxnet_sel, new, "NEE_VUT_REF_QC")
+
+    # Mask GPP outliers
+    fluxnet_sel = replace_outliers_with_nan(fluxnet_sel, "GPP_DT (kgC m-2 s-1)")
+
+    return fluxnet_sel
+
 ######### input arguments ############
 # Input site ID
 parser = argparse.ArgumentParser(description="User-specified parameters")
@@ -29,7 +49,6 @@ site_ID = args.site_ID
 
 # Define misc variables
 timedelta = "DD"
-
 
 ############## Check if run is necessary #############
 # Check if output file for the site already exists (quits if so)
@@ -47,25 +66,12 @@ if os.path.exists(output_path):
 fluxnet_meta = import_flux_metadata(FLUX_METADATA)
 site_lat = fluxnet_meta.loc[
     fluxnet_meta["Site ID"] == site_ID, "Latitude (degrees)"
-].values
+    ].values
 site_lon = fluxnet_meta.loc[
     fluxnet_meta["Site ID"] == site_ID, "Longitude (degrees)"
-].values
+    ].values
 
-# Import site AmeriFlux FLUXNET data
-fluxnet_sel = import_flux_site_data(FLUX_DATA_PATH, site_ID, timedelta)
-
-# Generate old and new list to clean data
-cols = fluxnet_sel.columns.tolist()
-list = [cols[0], cols[-1]]
-new_list = ["NEE (kgC m-2 s-1)", "GPP_DT (kgC m-2 s-1)"]
-# Convert and clean datasets 
-for old, new in zip(list, new_list):
-   fluxnet_sel = convert_flux_to_micasa_units(fluxnet_sel, old, new)
-   fluxnet_sel = clean_flux_datasets(fluxnet_sel, new, "NEE_VUT_REF_QC")
-
-# Mask GPP outliers
-fluxnet_sel = replace_outliers_with_nan(fluxnet_sel, "GPP_DT (kgC m-2 s-1)")
+fluxnet_data = import_flux_and_prep_data(site_ID)
 
 ############ Import Preprocessed Micasa Data ################
 filename = f"{site_ID}_micasa_{timedelta}.csv"
@@ -77,12 +83,12 @@ micasa_ds = pd.read_csv(path, index_col=0, parse_dates=True)
 ## NEE
 NEE_ds = pd.DataFrame()
 NEE_ds["MiCASA"] = micasa_ds["MiCASA NEE (kg m-2 s-1)"]
-NEE_ds["FluxNet"] = fluxnet_sel["NEE (kgC m-2 s-1)"]
+NEE_ds["FluxNet"] = fluxnet_data["NEE (kgC m-2 s-1)"]
 
 ## NPP
 NPP_ds = pd.DataFrame()
 NPP_ds["MiCASA"] = micasa_ds["MiCASA NPP (kg m-2 s-1)"]
-NPP_ds["FluxNet DT GPP/2"] = fluxnet_sel["GPP_DT (kgC m-2 s-1)"] / 2
+NPP_ds["FluxNet DT GPP/2"] = fluxnet_data["GPP_DT (kgC m-2 s-1)"] / 2
 
 
 ######### Create plots ########################
