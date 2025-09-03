@@ -8,11 +8,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import MICASA_PREPROCESSED_DATA, FLUX_DATA_PATH, FLUX_METADATA
 
-from utils.functions import import_flux_site_data, replace_outliers_with_nan, import_flux_metadata
+from utils.functions import import_flux_metadata, import_flux_site_data, convert_flux_to_micasa_units, replace_outliers_with_nan, clean_flux_datasets
 
 # Import other modules
 import argparse
-import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
@@ -54,36 +53,19 @@ site_lon = fluxnet_meta.loc[
 ].values
 
 # Import site AmeriFlux FLUXNET data
-fluxnet_sel_sub = import_flux_site_data(FLUX_DATA_PATH, site_ID, timedelta)
+fluxnet_sel = import_flux_site_data(FLUX_DATA_PATH, site_ID, timedelta)
 
-# Make a clean output df for conversions
-fluxnet_final = pd.DataFrame()
-
-# NEE
-## Convert units
-## FluxNet NEE_VUT_REF in DD (gC m-2 d-1) to MiCASA (kgC m-2 s-1)
-fluxnet_final["NEE (kgC m-2 s-1)"] = fluxnet_sel_sub["NEE_VUT_REF"] * 1e-3 / 86400
-
-# GPP
-## FluxNet GPP in DD (gC m-2 d-1) to MiCASA (kgC m-2 s-1)
-fluxnet_final["GPP (DT) (kgC m-2 s-1)"] = (
-    fluxnet_sel_sub["GPP_DT_VUT_REF"] * 1e-3 / 86400
-)
-fluxnet_final["GPP (NT) (kgC m-2 s-1)"] = (
-    fluxnet_sel_sub["GPP_NT_VUT_REF"] * 1e-3 / 86400
-)
-
-## Mask bad QC values for NEE and GPP
-## for daily FluxNet data, QC is fraction between 0-1, indicating percentage of measured and good quality gapfill data
-fluxnet_final["NEE (kgC m-2 s-1)"] = fluxnet_final["NEE (kgC m-2 s-1)"].mask(
-    fluxnet_sel_sub["NEE_VUT_REF_QC"] < 1, np.nan
-)
-fluxnet_final["GPP (DT) (kgC m-2 s-1)"] = fluxnet_final["GPP (DT) (kgC m-2 s-1)"].mask(
-    fluxnet_sel_sub["NEE_VUT_REF_QC"] < 1, np.nan
-)
+# Generate old and new list to clean data
+cols = fluxnet_sel.columns.tolist()
+list = [cols[0], cols[-1]]
+new_list = ["NEE (kgC m-2 s-1)", "GPP_DT (kgC m-2 s-1)"]
+# Convert and clean datasets 
+for old, new in zip(list, new_list):
+   fluxnet_sel = convert_flux_to_micasa_units(fluxnet_sel, old, new)
+   fluxnet_sel = clean_flux_datasets(fluxnet_sel, new, "NEE_VUT_REF_QC")
 
 # Mask GPP outliers
-fluxnet_final = replace_outliers_with_nan(fluxnet_final, "GPP (DT) (kgC m-2 s-1)")
+fluxnet_sel = replace_outliers_with_nan(fluxnet_sel, "GPP_DT (kgC m-2 s-1)")
 
 ############ Import Preprocessed Micasa Data ################
 filename = f"{site_ID}_micasa_{timedelta}.csv"
@@ -95,12 +77,12 @@ micasa_ds = pd.read_csv(path, index_col=0, parse_dates=True)
 ## NEE
 NEE_ds = pd.DataFrame()
 NEE_ds["MiCASA"] = micasa_ds["MiCASA NEE (kg m-2 s-1)"]
-NEE_ds["FluxNet"] = fluxnet_final["NEE (kgC m-2 s-1)"]
+NEE_ds["FluxNet"] = fluxnet_sel["NEE (kgC m-2 s-1)"]
 
 ## NPP
 NPP_ds = pd.DataFrame()
 NPP_ds["MiCASA"] = micasa_ds["MiCASA NPP (kg m-2 s-1)"]
-NPP_ds["FluxNet DT GPP/2"] = fluxnet_final["GPP (DT) (kgC m-2 s-1)"] / 2
+NPP_ds["FluxNet DT GPP/2"] = fluxnet_sel["GPP_DT (kgC m-2 s-1)"] / 2
 
 
 ######### Create plots ########################
