@@ -138,6 +138,21 @@ def import_flux_site_data(flux_data_path, site_ID, timedelta):
         raise ValueError(f"Timedelta {timedelta} invalid")
 
 
+def convert_flux_to_micasa_units(df_in, column, new_column):
+    """ Convert Flux daily data units (gC m-2 d-1) to MiCASA (kgC m-2 s-1)
+    Args:
+        df_in (pd.Dataframe): The input DataFrame.
+        column (str): The column name to be converted.
+        new_column (str): The new name for the converted column.
+
+    Returns:
+        pd.Dataframe: The DataFrame with an added column of converted values.
+
+    """
+    df = df_in.copy()
+    df[new_column] = df[column] * 1e-3 / 86400
+
+    return df
 
 
 def replace_outliers_with_nan(df, column):
@@ -162,3 +177,17 @@ def replace_outliers_with_nan(df, column):
     )
     return df
 
+def clean_flux_datasets(df, column, QC_column):
+    """ Set values to nan where FluxNet QC < 1
+
+    Args:
+        df (pd.DataFrame): The DataFrame.
+        column (str): The column name to clean.
+        QC_column (str): The column name to obtain QC values
+
+    Returns:
+        pd.DataFrame: The DataFrame with poor QC readings as nan.
+    """
+    df[column] = df[column].mask(df[QC_column] < 1, np.nan)
+
+    return df
