@@ -19,7 +19,7 @@ import cartopy.crs as ccrs
 import os
 
 ##### Functions ########
-def import_flux_and_prep_data(site_ID):
+def import_flux_and_prep_data(site_ID, timedelta):
     # Import site AmeriFlux FLUXNET data
     fluxnet_sel = import_flux_site_data(FLUX_DATA_PATH, site_ID, timedelta)
 
@@ -68,7 +68,7 @@ if __name__ == "main":
     site_lat = fluxnet_meta.loc[fluxnet_meta["Site ID"] == site_ID, "Latitude (degrees)"].values
     site_lon = fluxnet_meta.loc[fluxnet_meta["Site ID"] == site_ID, "Longitude (degrees)"].values
 
-    fluxnet_data = import_flux_and_prep_data(site_ID)
+    fluxnet_data = import_flux_and_prep_data(site_ID, timedelta)
 
     ############ Import Preprocessed Micasa Data ################
     filename = f"{site_ID}_micasa_{timedelta}.csv"
