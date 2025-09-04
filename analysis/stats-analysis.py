@@ -8,7 +8,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from config import MICASA_PREPROCESSED_DATA, FLUX_DATA_PATH, FLUX_METADATA
 
-from utils.functions import import_flux_site_data
+from utils.functions import import_flux_metadata
+from plotting.plots_generator import import_flux_and_prep_data
 import pandas as pd
 import os
 from sklearn.metrics import root_mean_squared_error
@@ -32,49 +33,13 @@ if os.path.exists(output_path):
 
 #################### Import Flux Data ##############################
 # Import site metadata csv
-ameriflux_meta = pd.read_csv(FLUX_METADATA, sep="\t")
-fluxnet_meta = ameriflux_meta.loc[
-    ameriflux_meta["AmeriFlux FLUXNET Data"] == "Yes"
-]  # use FLUXNET only
+fluxnet_meta = import_flux_metadata(FLUX_METADATA)
 ids_list = fluxnet_meta["Site ID"]
-
-# parser = argparse.ArgumentParser(description='Site ID')
-# parser.add_argument('site_ID', metavar= 'site_ID', type=str,
-#                     help='FluxNet Site ID')
-# args = parser.parse_args()
-# site_ID = args.site_ID
 
 results = []
 
 for site_ID in ids_list:
-    fluxnet_sel_sub = import_flux_site_data(FLUX_DATA_PATH, site_ID, timedelta)
-
-    # Make a clean output df
-    fluxnet_final = pd.DataFrame()
-
-    # NEE
-    ## Convert units
-    ## FluxNet NEE_VUT_REF in DD (gC m-2 d-1) to MiCASA (kgC m-2 s-1)
-    fluxnet_final["NEE (kgC m-2 s-1)"] = fluxnet_sel_sub["NEE_VUT_REF"] * 1e-3 / 86400
-
-    # GPP
-    ## FluxNet GPP in DD (gC m-2 d-1) to MiCASA (kgC m-2 s-1)
-    fluxnet_final["GPP (DT) (kgC m-2 s-1)"] = (
-        fluxnet_sel_sub["GPP_DT_VUT_REF"] * 1e-3 / 86400
-    )
-    fluxnet_final["GPP (NT) (kgC m-2 s-1)"] = (
-        fluxnet_sel_sub["GPP_NT_VUT_REF"] * 1e-3 / 86400
-    )
-
-    """
-## Mask bad QC values for NEE and GPP
-## for daily FluxNet data, QC is fraction between 0-1, indicating percentage of measured and good quality gapfill data
-    fluxnet_final['NEE (kgC m-2 s-1)'] = fluxnet_final['NEE (kgC m-2 s-1)'].mask(fluxnet_sel_sub['NEE_VUT_REF_QC'] < 1, np.nan)
-    fluxnet_final['GPP (DT) (kgC m-2 s-1)'] = fluxnet_final['GPP (DT) (kgC m-2 s-1)'].mask(fluxnet_sel_sub['NEE_VUT_REF_QC'] < 1, np.nan)
-
-# Mask GPP outliers
-    fluxnet_final = replace_outliers_with_nan(fluxnet_final,'GPP (DT) (kgC m-2 s-1)')
-    """
+    fluxnet_data = import_flux_and_prep_data(site_ID, timedelta)
 
     ############ Import Preprocessed Micasa Data ################
     filename = f"{site_ID}_micasa_{timedelta}.csv"
@@ -86,14 +51,14 @@ for site_ID in ids_list:
     ## NEE
     NEE_ds = pd.DataFrame()
     NEE_ds["MiCASA"] = micasa_ds["MiCASA NEE (kg m-2 s-1)"]
-    NEE_ds["FluxNet"] = fluxnet_final["NEE (kgC m-2 s-1)"]
+    NEE_ds["FluxNet"] = fluxnet_data["NEE (kgC m-2 s-1)"]
 
     NEE_RSME = root_mean_squared_error(NEE_ds.MiCASA, NEE_ds.FluxNet)
 
     # NPP
     NPP_ds = pd.DataFrame()
     NPP_ds["MiCASA"] = micasa_ds["MiCASA NPP (kg m-2 s-1)"]
-    NPP_ds["FluxNet DT GPP/2"] = fluxnet_final["GPP (DT) (kgC m-2 s-1)"] / 2
+    NPP_ds["FluxNet DT GPP/2"] = fluxnet_data["GPP_DT (kgC m-2 s-1)"] / 2
     NPP_RSME = root_mean_squared_error(NPP_ds.MiCASA, NPP_ds["FluxNet DT GPP/2"])
 
     # Write values out to a list
