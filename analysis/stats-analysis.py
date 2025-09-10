@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from config import MICASA_PREPROCESSED_DATA, FLUX_DATA_PATH, FLUX_METADATA
+from config import MICASA_PREPROCESSED_DATA, FLUX_METADATA
 
 from utils.functions import import_flux_metadata
 from plotting.plots_generator import import_flux_and_prep_data
@@ -16,20 +16,6 @@ from sklearn.metrics import root_mean_squared_error
 
 # Define misc variables
 timedelta = "DD"
-
-# FIX: I need to have a way to check if the stats were created for each site??
-"""
-############## Check if run is necessary #############
-# Check if output file for the site already exists (quits if so)
-output_dir = 'plots'
-output_filename = f'{site_ID}_NEE_NPP.png'
-output_path = os.path.join(output_dir, output_filename)
-
-# If the file exists, exit the script
-if os.path.exists(output_path):
-    print(f"File for site {site_ID} already exists: {output_path}. Exiting.")
-    sys.exit()  # Exit the script immediately
-"""
 
 #################### Import Flux Data ##############################
 # Import site metadata csv
