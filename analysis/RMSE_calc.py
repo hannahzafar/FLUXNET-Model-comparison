@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Starting point for statistical analysis between MiCASA and FLUXNET datasets
+# Calculating RMSE between MiCASA and FluxNet
 
 # Import config variables and functions
 import sys
@@ -58,6 +58,6 @@ for site_ID in ids_list:
     })
 
 ds = pd.DataFrame(results)
-fname = "results.csv"
+fname = "RMSE_results.csv"
 ds.to_csv(fname, index=False)
 print(f"CSV written to: {fname}")
