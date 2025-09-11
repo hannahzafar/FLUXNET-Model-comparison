@@ -24,7 +24,7 @@ results = []
 
 for site_ID in ids_list:
     # create a site id dictionary to append to results
-    site_dict = {"site_ID" : site_ID}
+    site_dict = {"SiteID" : site_ID}
 
     fluxnet_data = import_flux_and_prep_data(site_ID, timedelta)
     # Subset needed columns
