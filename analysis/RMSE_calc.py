@@ -10,9 +10,20 @@ from config import MICASA_PREPROCESSED_DATA, FLUX_METADATA
 
 from utils.functions import import_flux_metadata
 from plotting.plots_generator import import_flux_and_prep_data
+import argparse
+import numpy as np
 import pandas as pd
 import os
 from sklearn.metrics import root_mean_squared_error
+
+# Input arg
+parser = argparse.ArgumentParser(description="User-specified parameters")
+parser.add_argument(
+    "periodicity", metavar="P", type=str,
+    choices = ["GRW", "ANN"], help="GRW (growing) or ANN (annual)",
+)
+args = parser.parse_args()
+period = args.periodicity
 
 # Define misc variables
 timedelta = "DD"
@@ -20,6 +31,10 @@ timedelta = "DD"
 #################### Import Flux Data ##############################
 # Import site metadata csv
 fluxnet_meta = import_flux_metadata(FLUX_METADATA)
+if period=="GRW":
+    # Only use NH
+    fluxnet_meta = fluxnet_meta[fluxnet_meta["Latitude (degrees)"]>0]
+
 ids_list = fluxnet_meta["Site ID"]
 
 results = []
@@ -38,17 +53,39 @@ for site_ID in ids_list:
     NEE_ds = pd.DataFrame()
     NEE_ds["MiCASA"] = micasa_ds["MiCASA NEE (kg m-2 s-1)"]
     NEE_ds["FluxNet"] = fluxnet_data["NEE (kgC m-2 s-1)"]
-    # Drop NA values for RMSE
-    NEE_ds_clean = NEE_ds.dropna(subset=['FluxNet'])
-    NEE_RMSE = root_mean_squared_error(NEE_ds_clean.MiCASA, NEE_ds_clean.FluxNet)
 
     ## NPP
     NPP_ds = pd.DataFrame()
     NPP_ds["MiCASA"] = micasa_ds["MiCASA NPP (kg m-2 s-1)"]
     NPP_ds["FluxNet DT GPP/2"] = fluxnet_data["GPP_DT (kgC m-2 s-1)"] / 2
-    # Drop NA values for RMSE
+
+    if period=='GRW':
+        JJA = [6, 7, 8]
+        NEE_ds = NEE_ds[NEE_ds.index.month.isin(JJA)]
+        # print(NEE_ds)
+        NPP_ds = NPP_ds[NPP_ds.index.month.isin(JJA)]
+        # print(NPP_ds)
+
+    # Drop NA values and check if empty
+    NEE_ds_clean = NEE_ds.dropna(subset=['FluxNet'])
     NPP_ds_clean = NPP_ds.dropna(subset=['FluxNet DT GPP/2'])
-    NPP_RMSE = root_mean_squared_error(NPP_ds_clean.MiCASA, NPP_ds_clean["FluxNet DT GPP/2"])
+
+    '''
+    # Skip if both datasets are empty
+    if NEE_ds_clean.empty and NPP_ds_clean.empty:
+        print(f'Skipping {site_ID}, NEE and NPP datasets for GRW are empty')
+        continue
+    '''
+
+    try: 
+        NEE_RMSE = root_mean_squared_error(NEE_ds_clean.MiCASA, NEE_ds_clean.FluxNet)
+    except ValueError: 
+        NEE_RMSE = np.nan
+
+    try:
+        NPP_RMSE = root_mean_squared_error(NPP_ds_clean.MiCASA, NPP_ds_clean["FluxNet DT GPP/2"])
+    except ValueError: 
+        NPP_RMSE = np.nan
 
     # Write values out to a list
     results.append({
@@ -58,6 +95,6 @@ for site_ID in ids_list:
     })
 
 ds = pd.DataFrame(results)
-fname = "RMSE_results.csv"
+fname = f"RMSE_results_{period}.csv"
 ds.to_csv(fname, index=False)
 print(f"CSV written to: {fname}")
