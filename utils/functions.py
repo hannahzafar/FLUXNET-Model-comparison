@@ -26,7 +26,7 @@ def import_flux_metadata(flux_metadata_path):
             ]  # use FLUXNET only
     return fluxnet_meta
 
-def import_site_RSME_data(flux_metadata_path,RSME_results_path):
+def import_site_RMSE_data(flux_metadata_path,RMSE_results_path):
     fluxnet_meta = import_flux_metadata(flux_metadata_path)
     site_subset = ['Site ID', 
                'Longitude (degrees)',
@@ -40,7 +40,7 @@ def import_site_RSME_data(flux_metadata_path,RSME_results_path):
     df_meta = df_meta.set_index('Site ID')
     df_meta = df_meta.rename(columns={'Latitude (degrees)': 'lat', 'Longitude (degrees)': 'lon'})
 
-    RMSE_results = pd.read_csv(RSME_results_path, index_col='SiteID')
+    RMSE_results = pd.read_csv(RMSE_results_path, index_col='SiteID')
     return df_meta.join(RMSE_results, on='Site ID', how="inner")
 
 def local_std_to_utc_std(df, col, lat, lon):
