@@ -24,6 +24,7 @@ def import_flux_metadata(flux_metadata_path):
     fluxnet_meta = ameriflux_meta.loc[
             ameriflux_meta["AmeriFlux FLUXNET Data"] == "Yes"
             ]  # use FLUXNET only
+    fluxnet_meta = fluxnet_meta.reset_index(drop=True)
     return fluxnet_meta
 
 def import_site_RMSE_data(flux_metadata_path,RMSE_results_path):
