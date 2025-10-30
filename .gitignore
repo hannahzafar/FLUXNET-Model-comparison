@@ -1,7 +1,8 @@
 *.out
 .ipynb_checkpoints
 _old
-ameriflux-data
+data/ameriflux-data
+data/micasa-data
 intermediates
 plots
 __pycache__
