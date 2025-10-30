@@ -25,4 +25,5 @@ FLUX_DATA_PATH = DATA_FILEPATH / "ameriflux-data/"
 # Flux metadata file
 FLUX_METADATA = FLUX_DATA_PATH / "AmeriFlux-site-search-results-202410071335.tsv"
 
-
+# MERRA-2 Dataset Virtual Stores
+MERRA_DATA_PATH = DATA_FILEPATH / "MERRA_data/"
