@@ -32,11 +32,9 @@ def import_site_RMSE_data(flux_metadata_path,RMSE_results_path):
     site_subset = ['Site ID', 
                'Longitude (degrees)',
                 'Latitude (degrees)',
+                'Years of AmeriFlux FLUXNET Data',
                ]
-    site_subset = ['Site ID', 
-               'Longitude (degrees)',
-                'Latitude (degrees)',
-               ]
+
     df_meta = fluxnet_meta[site_subset]
     df_meta = df_meta.set_index('Site ID')
     df_meta = df_meta.rename(columns={'Latitude (degrees)': 'lat', 'Longitude (degrees)': 'lon'})
