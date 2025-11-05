@@ -7,7 +7,7 @@ intermediates
 plots
 __pycache__
 *.csv
-virtual_store*
+M2store_*
 
 # pixi environments
 .pixi

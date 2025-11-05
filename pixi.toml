@@ -19,6 +19,7 @@ cartopy = ">=0.24.0,<0.25"
 dask = ">=2025.7.0,<2026"
 timezonefinder = ">=6.5.9,<7"
 scikit-learn = ">=1.7.1,<2"
+pip = ">=25.2,<26"
 
 [pypi-dependencies]
-merra2-tools = { git = "https://github.com/hannahzafar/merra2-tools.git" }
+merra2-tools = { git = "https://github.com/hannahzafar/merra2-tools.git", tag = "v0.2.0"}
