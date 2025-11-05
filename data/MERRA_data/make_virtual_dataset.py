@@ -28,6 +28,10 @@ if var == "PRECTOTCORR":
     freq2 = "M"
     group = "flx"
 
+else:
+    print("var not yet supported")
+    sys.exit()
+
 details, fileslist = find_MERRA2_files(
     MERRA2_ROOT, freq1, freq2, group, start_yr, end_yr
 )
