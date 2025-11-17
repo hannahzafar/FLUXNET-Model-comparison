@@ -16,11 +16,11 @@ def polyfit1d_and_plot(df, var1, var2, xlabel, title):
     """
     coef = np.polyfit(df[var1], df[var2], 1)
     poly1d_fn = np.poly1d(coef)
-    r2 = r2_score(df[var1], poly1d_fn(df[var2]))
+    r2 = r2_score(df[var2], poly1d_fn(df[var1]))
     
     fig, ax = plt.subplots(1,1)
     ax.scatter(df[var1], df[var2])
-    ax.plot(df[var1],poly1d_fn(df[var1]), color="red", label=f"$R^2$: {r2:.2f}")
+    ax.plot(df[var1],poly1d_fn(df[var1]), color="red", label=f"$R^2$: {r2:.5f}")
     ax.set_xlabel(xlabel)
     ax.set_ylabel("RMSE (FluxNet vs MiCASA)")
     ax.set_title(title)
